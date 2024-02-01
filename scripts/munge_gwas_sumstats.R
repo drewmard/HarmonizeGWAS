@@ -11,11 +11,15 @@ library(data.table)
 # Config path:
 # config <- fromJSON("~/Documents/Research/munge_test.config")
 # config <- fromJSON("~/Downloads/munge.config")
-# config = fromJSON("/oak/stanford/groups/smontgom/amarder/LDSC_pipeline/config/munge_test.config")
+# config = fromJSON("/oak/stanford/groups/smontgom/amarder/LDSC_pipeline/scripts/new_gwas/munge_test.config")
 args = commandArgs(trailingOnly=TRUE)
 configFileName = args[1]
-configFileName = "/oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/config/munge_test.config"
+configFileName = "/oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/config/immune.config"
+configFileName = "/oak/stanford/groups/smontgom/amarder/LDSC_pipeline/scripts/new_gwas/munge.config"
 config = fromJSON(configFileName)
+
+path_to_dbsnp = "/oak/stanford/groups/smontgom/amarder/data/dbsnp" # 
+TMPDIR = "/oak/stanford/groups/smontgom/amarder/tmp"
 
 studies = config$studies$study_info
 for (i in 1:length(studies)) {
@@ -57,10 +61,22 @@ for (i in 1:length(studies)) {
   f = paste0(config$input_base_dir,"/",trait,"/",trait,".txt.gz")
   df = fread(f,data.table = F,stringsAsFactors = F)
   print(paste0("Summary statistics read into memory..."))
+  
+  # Reformat:
   df = df[,idx]
   colnames(df) = sub("_index","",cols_to_use_ordered) # rename! (remove _index)
   df$chr = sub("chr","",df$chr) # remove chr!
-  df$direction = ifelse(sign(df$effect)>0,"+","-")
+  
+  # add direction column
+  if ("effect" %in% colnames(df)) {
+    df$direction = ifelse(sign(df$effect)>0,"+","-")
+  } else if ("zscore" %in% colnames(df)) {
+    df$direction = ifelse(sign(df$zscore)>1,"+","-")
+  } else if ("or" %in% colnames(df)) {
+    df$direction = ifelse(sign(df$or)>1,"+","-")
+  } else {
+    stop("Missing effect column!")
+  }
   colnames(df)[colnames(df)=="effect"] = "beta" # rename if necessary!
   print(paste0("Summary statistics reformatted..."))
   
@@ -70,7 +86,11 @@ for (i in 1:length(studies)) {
   fwrite(df,f.out,quote = F,na = "NA",sep = '\t',row.names = F,col.names = T,compress = "gzip")
   print(paste0("Data frame saved to: ",f.out," ..."))
   
-  if (study_info$source_build=="hg19") {
+  if (!("rsid" %in% colnames(df))) {
+    df = dbsnpQuery(df,type="rsid",tmpdir=TMPDIR,SNPFILE=paste0(path_to_dbsnp,"/",study_info$source_build,"/snp151.v2.txt.gz"))
+  }
+  
+  if (study_info$source_build=="hg19" | config$genome_build=="hg19") {
     
   }
 }
