@@ -58,13 +58,13 @@ for (i in 1:length(studies)) {
   df = fread(f,data.table = F,stringsAsFactors = F)
   print(paste0("Summary statistics read into memory..."))
   df = df[,idx]
-  colnames(df) = sub("_index","",cols_to_use_ordered) # rename!
+  colnames(df) = sub("_index","",cols_to_use_ordered) # rename! (remove _index)
   df$chr = sub("chr","",df$chr) # remove chr!
   df$direction = ifelse(sign(df$effect)>0,"+","-")
   colnames(df)[colnames(df)=="effect"] = "beta" # rename if necessary!
   print(paste0("Summary statistics reformatted..."))
   
-  # Save dataframe to correct source build (e.g. hg19 or hg38):
+  # Save dataframe to the specified source build (e.g. hg19 or hg38):
   dir.create(paste0(config$output_base_dir,study_info$source_build,"/",trait),showWarnings = FALSE)
   f.out = paste0(config$output_base_dir,study_info$source_build,"/",trait,"/",trait,".txt.gz")
   fwrite(df,f.out,quote = F,na = "NA",sep = '\t',row.names = F,col.names = T,compress = "gzip")
