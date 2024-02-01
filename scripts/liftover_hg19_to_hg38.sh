@@ -25,7 +25,7 @@ echo "Script: Performing hg19 to hg38 liftOver for sumstats..."
 # reformat:
 echo "Reformatting..."
 sumstatpath=$path_to_downloaded_gwas/hg19/$trait/$trait.txt.gz
-zcat $sumstatpath | awk -f $HEADDIR/t.awk -v cols=chr,snp_pos,rsid | awk -v OFS='\t' '{print "chr"$1,$2-1,$2,$3}' > $TMPDIR/tmp_hg19.bed
+zcat $sumstatpath | awk -f $HEADDIR/scripts/t.awk -v cols=chr,snp_pos,rsid | awk -v OFS='\t' '{print "chr"$1,$2-1,$2,$3}' > $TMPDIR/tmp_hg19.bed
 
 # liftover: hg19 to hg38 ################################################
 echo "Running liftOver..."
