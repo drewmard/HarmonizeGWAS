@@ -69,5 +69,9 @@ for (i in 1:length(studies)) {
   f.out = paste0(config$output_base_dir,study_info$source_build,"/",trait,"/",trait,".txt.gz")
   fwrite(df,f.out,quote = F,na = "NA",sep = '\t',row.names = F,col.names = T,compress = "gzip")
   print(paste0("Data frame saved to: ",f.out," ..."))
+  
+  if (study_info$source_build=="hg19") {
+    
+  }
 }
 
