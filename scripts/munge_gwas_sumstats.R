@@ -11,7 +11,11 @@ library(data.table)
 # Config path:
 # config <- fromJSON("~/Documents/Research/munge_test.config")
 # config <- fromJSON("~/Downloads/munge.config")
-config = fromJSON("/oak/stanford/groups/smontgom/amarder/LDSC_pipeline/config/munge_test.config")
+# config = fromJSON("/oak/stanford/groups/smontgom/amarder/LDSC_pipeline/config/munge_test.config")
+args = commandArgs(trailingOnly=TRUE)
+configFileName = args[1]
+configFileName = "/oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/config/munge_test.config"
+config = fromJSON(configFileName)
 
 studies = config$studies$study_info
 for (i in 1:length(studies)) {
