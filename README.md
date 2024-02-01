@@ -14,13 +14,18 @@ This repo contains a basic pipeline for downloading and harmonizing GWAS summary
 
 I use a conda/mamba environment called `r`, where `jsonlite` and `data.table` packages are installed in R.
 
-The liftOver script uses a conda/mamba environment called `kent-tools` for running liftOver.
+I use a conda/mamba environment called `kent-tools` for running liftOver.
 
 ## (1) Download GWAS.
 
-Within the following script, manually edit in the directory where 
+Within the following script:
 
 ```scripts/download_gwas/immune_gwas_download.sh```
+
+manually edit `dir=/path/to/HarmonizeGWAS` directory.
+
+
+
 
 ## (2)
 
