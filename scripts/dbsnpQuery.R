@@ -144,16 +144,20 @@ dbsnpQuery = function(data_input,
     
     print("Querying dbSNP using chr + pos...")
     
+    print("---Saving bed file...")
     BEDFILE=paste0(tmpdir,"/",trait,".bed")
     TABIXOUTFILE = paste0(tmpdir,"/",trait,".tabix.bed")
     fwrite(data.frame(paste0("chr",data_input$chr),data_input$snp_pos-2,data_input$snp),BEDFILE,quote = F,na = "NA",sep = '\t',row.names = F,col.names = F)
     
-    # run tabix
+    print("---Tabix using bed file...")
     cmd = paste0("/home/amarder/micromamba/bin/tabix -R ",BEDFILE," ",SNPFILE," > ",TABIXOUTFILE)
     system(cmd)
     
     # read in dbsnp and preprocess:
+    print("---Read in dbsnp file...")
     dbsnp = fread(TABIXOUTFILE,data.table = F,stringsAsFactors = F)
+    
+    print("---Preprocess dbsnp file...")
     y = strsplit(dbsnp$V5,"/")
     chrNum = sub("chr","",dbsnp$V1)
     dbsnp = data.frame(
@@ -170,6 +174,7 @@ dbsnpQuery = function(data_input,
     )
     
     # merge based on chr, pos, a1, a2
+    print("---Merge based on chr, pos, a1, a2...")
     data_input$orig_id = paste0(data_input$chr,"_",data_input$snp_pos,"_",data_input$non_effect_allele,"_",data_input$effect_allele)
     sumstat_expanded = expand_sumstats_via_flip_reverse(data_input)
     sumstat_expanded$new_id = paste0(sumstat_expanded$chr,"_",sumstat_expanded$snp_pos,"_",sumstat_expanded$non_effect_allele,"_",sumstat_expanded$effect_allele)
@@ -180,6 +185,7 @@ dbsnpQuery = function(data_input,
     # merge based on chr, pos for other snps
     # need to then add sumstat_expanded, which didnt merge with dbsnp:
     # tmp = those that didnt get merged
+    print("---Merge based on chr + pos...")
     tmp = subset(data_input,!(orig_id %in% data_out$orig_id))
     if (length(tmp) > 0) { 
       data_out2 = merge(tmp,dbsnp[,c("rsid","chr","snp_pos")],
@@ -194,6 +200,7 @@ dbsnpQuery = function(data_input,
       data_out = rbind(data_out,tmp)
     }
     # sort by chr and position, and remove orig_id column
+    print("---Sorting...")
     data_out = data_out[order(data_out$chr,data_out$snp_pos),]
     data_out = data_out[,colnames(data_out)!="orig_id"]
     
@@ -202,5 +209,6 @@ dbsnpQuery = function(data_input,
     system(paste0("rm ",TABIXOUTFILE))
     
   }
+  print("---dbsnpQuery complete.")
   return(data_input1)
 }
