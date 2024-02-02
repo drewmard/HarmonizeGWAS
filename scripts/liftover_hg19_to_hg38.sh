@@ -1,7 +1,6 @@
 # module load R
-
-conda init bash
-source ~/.bashrc
+# conda init bash
+# source ~/.bashrc
 
 trait=$1
 TMPDIR=$2

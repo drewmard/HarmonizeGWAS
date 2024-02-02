@@ -8,18 +8,17 @@
 library(jsonlite)
 library(data.table)
 
+# Initialize
+path_to_dbsnp = "/oak/stanford/groups/smontgom/amarder/data/dbsnp" # this could also be: /oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/bin/dbsnp/hg19
+TMPDIR = "/oak/stanford/groups/smontgom/amarder/tmp"
+HEADDIR = "/oak/stanford/groups/smontgom/amarder/HarmonizeGWAS"
+
 # Config path:
-# config <- fromJSON("~/Documents/Research/munge_test.config")
-# config <- fromJSON("~/Downloads/munge.config")
-# config = fromJSON("/oak/stanford/groups/smontgom/amarder/LDSC_pipeline/scripts/new_gwas/munge_test.config")
 args = commandArgs(trailingOnly=TRUE)
 configFileName = args[1]
 configFileName = "/oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/config/immune.config"
 configFileName = "/oak/stanford/groups/smontgom/amarder/LDSC_pipeline/scripts/new_gwas/munge.config"
 config = fromJSON(configFileName)
-
-path_to_dbsnp = "/oak/stanford/groups/smontgom/amarder/data/dbsnp" # 
-TMPDIR = "/oak/stanford/groups/smontgom/amarder/tmp"
 
 studies = config$studies$study_info
 for (i in 1:length(studies)) {
@@ -71,14 +70,26 @@ for (i in 1:length(studies)) {
   if ("effect" %in% colnames(df)) {
     df$direction = ifelse(sign(df$effect)>0,"+","-")
   } else if ("zscore" %in% colnames(df)) {
-    df$direction = ifelse(sign(df$zscore)>1,"+","-")
+    df$direction = ifelse(sign(df$zscore)>0,"+","-")
   } else if ("or" %in% colnames(df)) {
     df$direction = ifelse(sign(df$or)>1,"+","-")
   } else {
     stop("Missing effect column!")
   }
   colnames(df)[colnames(df)=="effect"] = "beta" # rename if necessary!
+  colnames(df)[colnames(df)=="zscore"] = "z" # rename if necessary!
   print(paste0("Summary statistics reformatted..."))
+  
+  # Add rsid if needed:
+  build = ifelse(is.na(study_info$source_build),config$genome_build,study_info$source_build)
+  if (!("rsid" %in% colnames(df))) {
+    df = dbsnpQuery(data_input=df,
+                    type="chr_pos",
+                    tmpdir=TMPDIR,
+                    trait=trait,
+                    SNPFILE=paste0(path_to_dbsnp,"/",build,"/snp151.v2.txt.bgz")
+                    )
+  }
   
   # Save dataframe to the specified source build (e.g. hg19 or hg38):
   dir.create(paste0(config$output_base_dir,study_info$source_build,"/",trait),showWarnings = FALSE)
@@ -86,12 +97,10 @@ for (i in 1:length(studies)) {
   fwrite(df,f.out,quote = F,na = "NA",sep = '\t',row.names = F,col.names = T,compress = "gzip")
   print(paste0("Data frame saved to: ",f.out," ..."))
   
-  if (!("rsid" %in% colnames(df))) {
-    df = dbsnpQuery(df,type="rsid",tmpdir=TMPDIR,SNPFILE=paste0(path_to_dbsnp,"/",study_info$source_build,"/snp151.v2.txt.gz"))
-  }
-  
+  # If build == hg19, also save an hg38 version:
   if (study_info$source_build=="hg19" | config$genome_build=="hg19") {
-    
+    cmd = paste0("Rscript ",HEADDIR,"/scripts/liftover_hg19_to_hg38.sh ",trait," ",TMPDIR," ",HEADDIR," ",config$output_base_dir)
+    system(cmd)
   }
 }
 
