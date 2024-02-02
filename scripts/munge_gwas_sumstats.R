@@ -20,6 +20,9 @@ configFileName = "/oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/config/imm
 configFileName = "/oak/stanford/groups/smontgom/amarder/LDSC_pipeline/scripts/new_gwas/munge.config"
 config = fromJSON(configFileName)
 
+# Source function:
+source(paste0(HEADDIR,"/scripts/dbsnpQuery.R"))
+
 studies = config$studies$study_info
 for (i in 1:length(studies)) {
   

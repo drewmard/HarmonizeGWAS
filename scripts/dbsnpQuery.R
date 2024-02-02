@@ -146,10 +146,10 @@ dbsnpQuery = function(data_input,
     
     BEDFILE=paste0(tmpdir,"/",trait,".bed")
     TABIXOUTFILE = paste0(tmpdir,"/",trait,".tabix.bed")
-    fwrite(data.frame(paste0("chr",data_input$chr),data_input$snp_pos-2,data_input$snp)[1:100,],BEDFILE,quote = F,na = "NA",sep = '\t',row.names = F,col.names = F)
+    fwrite(data.frame(paste0("chr",data_input$chr),data_input$snp_pos-2,data_input$snp),BEDFILE,quote = F,na = "NA",sep = '\t',row.names = F,col.names = F)
     
     # run tabix
-    cmd = paste0("conda activate tabix; tabix -R ",BEDFILE," ",SNPFILE," > ",TABIXOUTFILE,"; conda deactivate")
+    cmd = paste0("/home/amarder/micromamba/bin/tabix -R ",BEDFILE," ",SNPFILE," > ",TABIXOUTFILE)
     system(cmd)
     
     # read in dbsnp and preprocess:
@@ -171,7 +171,7 @@ dbsnpQuery = function(data_input,
     
     # merge based on chr, pos, a1, a2
     data_input$orig_id = paste0(data_input$chr,"_",data_input$snp_pos,"_",data_input$non_effect_allele,"_",data_input$effect_allele)
-    sumstat_expanded = expand_sumstats_via_flip_reverse(data_input[1:100,])
+    sumstat_expanded = expand_sumstats_via_flip_reverse(data_input)
     sumstat_expanded$new_id = paste0(sumstat_expanded$chr,"_",sumstat_expanded$snp_pos,"_",sumstat_expanded$non_effect_allele,"_",sumstat_expanded$effect_allele)
     data_out <- merge(sumstat_expanded, dbsnp[,c("id","rsid")], 
                       by.x=c("new_id"),by.y=c("id"), all = FALSE)
