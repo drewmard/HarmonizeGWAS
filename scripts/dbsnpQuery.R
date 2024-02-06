@@ -144,7 +144,7 @@ dbsnpQuery = function(data_input,
     
     print("Querying dbSNP using chr + pos...")
     
-    f = SNPFIL
+    f = SNPFILE
     dbsnp = fread(SNPFILE,data.table = F,stringsAsFactors = F)
     
     print("---Preprocess dbsnp file...")
