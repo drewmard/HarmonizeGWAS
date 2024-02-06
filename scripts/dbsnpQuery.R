@@ -185,7 +185,7 @@ dbsnpQuery = function(data_input,
     
     tmp = subset(data_input,!(orig_id %in% data_out$orig_id))
     if (length(tmp)>0) {
-      tmp$rsid = NA
+      tmp$rsid = tmp$orig_id
       data_out = rbind(data_out,tmp)
     }
     # sort by chr and position, and remove orig_id column
@@ -197,7 +197,7 @@ dbsnpQuery = function(data_input,
     data_out = data_out[,colnames(data_out)!="orig_id"]
     data_out = data_out[,c("chr","snp_pos","non_effect_allele","effect_allele","rsid",
                            colnames(data_out)[!(colnames(data_out) %in% c("chr","snp_pos","non_effect_allele","effect_allele","rsid"))])]
-    
+
     # return:
     data_input1 = data_out
     

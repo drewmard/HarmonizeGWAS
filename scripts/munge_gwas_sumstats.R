@@ -106,8 +106,8 @@ for (i in 1:length(studies)) {
   print(paste0("Data frame saved to: ",f.out," ..."))
   
   # If build == hg19, also save an hg38 version:
-  if (study_info$source_build=="hg19" | config$genome_build=="hg19") {
-    cmd = paste0("Rscript ",HEADDIR,"/scripts/liftover_hg19_to_hg38.sh ",trait," ",TMPDIR," ",HEADDIR," ",config$output_base_dir)
+  if (build=="hg19") {
+    cmd = paste0(HEADDIR,"/scripts/liftover_hg19_to_hg38.sh ",trait," ",TMPDIR," ",HEADDIR," ",config$output_base_dir)
     system(cmd)
   }
 }
