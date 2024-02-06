@@ -96,10 +96,11 @@ for (i in 1:length(studies)) {
     #                 SNPFILE=paste0(path_to_dbsnp,"/",build,"/snp151Common.v2.txt.gz")
     #                 )
     library(parallel)
-    df$id = unlist(mclapply(mc.cores=8,1:nrow(df),function(i) {
+    df$rsid = unlist(mclapply(mc.cores=8,1:nrow(df),function(i) {
       # if(i%%10000 == 0){print(i)} 
       return(paste(df[i,c("chr","snp_pos","non_effect_allele","effect_allele")],collapse = '_'))
     }))
+    df = df[,c("rsid",colnames(df)[colnames(df)!="rsid"])]
   }
   
   # Save dataframe to the specified source build (e.g. hg19 or hg38):

@@ -5,9 +5,9 @@ trait <- args[1]
 TMPDIR <- args[2]
 path_to_downloaded_gwas <- args[3]
 
-# trait="Anorexia_nervosa_Watson_2019"
-# TMPDIR=paste0("/oak/stanford/groups/smontgom/amarder/tmp/",trait)
-# path_to_downloaded_gwas="/oak/stanford/groups/smontgom/amarder/LDSC_pipeline/gwas/munge"
+# trait="Alzheimer_Wightman_2021"
+# TMPDIR="/oak/stanford/groups/smontgom/amarder/tmp"
+# path_to_downloaded_gwas="/oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/out/gwas/munge"
 
 f.bed_hg38 <- paste0(TMPDIR,"/tmp_hg38.bed")
 f.gwas_hg19 <- paste0(path_to_downloaded_gwas,"/hg19/",trait,"/",trait,".txt.gz")

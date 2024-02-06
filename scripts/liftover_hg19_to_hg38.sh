@@ -38,6 +38,8 @@ echo "Preparing to write hg38 GWAS sumstat file..."
 Rscript $HEADDIR/scripts/create_hg38_sumstat.R $trait $TMPDIR $path_to_downloaded_gwas
 
 echo "Tabix the output file..."
+rm $path_to_downloaded_gwas/hg38/$trait/$trait.txt.gz
+rm $path_to_downloaded_gwas/hg38/$trait/$trait.txt.gz.tbi
 bgzip -f $path_to_downloaded_gwas/hg38/$trait/$trait.txt
 tabix -f -s 2 -b 3 -e 3 -S 1 $path_to_downloaded_gwas/hg38/$trait/$trait.txt.gz
 conda deactivate
