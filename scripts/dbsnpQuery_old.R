@@ -144,12 +144,23 @@ dbsnpQuery = function(data_input,
     
     print("Querying dbSNP using chr + pos...")
     
-    f = SNPFIL
+    print("---Saving bed file...")
+    BEDFILE=paste0(tmpdir,"/",trait,".bed")
+    TABIXOUTFILE = paste0(tmpdir,"/",trait,".tabix.bed")
+    fwrite(data.frame(paste0("chr",data_input$chr),data_input$snp_pos-2,data_input$snp),BEDFILE,quote = F,na = "NA",sep = '\t',row.names = F,col.names = F)
+    
+    print("---Tabix using bed file...")
+    cmd = paste0("/home/amarder/micromamba/bin/tabix -R ",BEDFILE," ",SNPFILE," > ",TABIXOUTFILE)
+    system(cmd)
+    
+    # read in dbsnp and preprocess:
+    print("---Read in dbsnp file...")
     dbsnp = fread(SNPFILE,data.table = F,stringsAsFactors = F)
+    dbsnp = fread(TABIXOUTFILE,data.table = F,stringsAsFactors = F)
     
     print("---Preprocess dbsnp file...")
     y = dbsnp$V5
-    y[grep("/",y,invert = T)] = "?/?"
+    y[grep("/",y[1:157],invert = T)] = "?/?"
     y = strsplit(y,"/")
     chrNum = sub("chr","",dbsnp$V1)
     dbsnp$id = paste(
@@ -159,8 +170,21 @@ dbsnpQuery = function(data_input,
       unlist(lapply(y,function(x)x[[2]])),
       sep = '_'
     )
-    dbsnp = dbsnp[!duplicated(dbsnp$id),]
-    colnames(dbsnp) = c("chr","start","snp_pos","rsid","alleles","id")
+    
+    dbsnp = data.frame(
+      id = paste(
+        sub("chr","",dbsnp$V1), # remove chr!
+        dbsnp$V3,
+        unlist(lapply(y,function(x)x[[1]])),
+        unlist(lapply(y,function(x)x[[2]])),
+        sep = '_'
+      ),
+      rsid = dbsnp$V4,
+      chr=chrNum,
+      snp_pos=dbsnp$V3
+    )
+    
+    head(data_input[,c("V1","V3","V4","V5")])
     
     # merge based on chr, pos, a1, a2
     print("---Merge based on chr, pos, a1, a2...")
@@ -191,17 +215,13 @@ dbsnpQuery = function(data_input,
     # sort by chr and position, and remove orig_id column
     print("---Sorting...")
     data_out = data_out[order(data_out$chr,data_out$snp_pos),]
-    
-    # Reformat
-    data_out = data_out[!duplicated(data_out$orig_id),]
     data_out = data_out[,colnames(data_out)!="orig_id"]
-    data_out = data_out[,c("chr","snp_pos","non_effect_allele","effect_allele","rsid",
-                           colnames(data_out)[!(colnames(data_out) %in% c("chr","snp_pos","non_effect_allele","effect_allele","rsid"))])]
     
     # return:
     data_input1 = data_out
+    system(paste0("rm ",TABIXOUTFILE))
     
   }
-  print("dbsnpQuery complete.")
+  print("---dbsnpQuery complete.")
   return(data_input1)
 }

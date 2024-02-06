@@ -30,15 +30,20 @@ Note: this is a large download (12G x 2).
 conda activate tabix
 mkdir -p bin/dbsnp/hg19; cd bin/dbsnp/hg19
 wget https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/snp151.txt.gz
-zcat snp151.txt.gz | cut -f2,3,4,5,10 | bgzip -c > snp151.v2.txt.bgz
-tabix -p bed snp151.v2.txt.bgz
+zcat snp151.txt.gz | cut -f2,3,4,5,10 | bgzip -c > snp151.v2.txt.gz
+tabix -p bed snp151.v2.txt.gz
 cd ../../..
 mkdir -p bin/dbsnp/hg38; cd bin/dbsnp/hg38
 wget https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/snp151.txt.gz
-zcat snp151.txt.gz | cut -f2,3,4,5,10 | bgzip -c > snp151.v2.txt.bgz
-tabix -p bed snp151.v2.txt.bgz
+zcat snp151.txt.gz | cut -f2,3,4,5,10 | bgzip -c > snp151.v2.txt.gz
+tabix -p bed snp151.v2.txt.gz
 cd ../../..
 ```
+
+or working with only common variants:
+
+wget https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/snp151Common.txt.gz
+zcat snp151Common.txt.gz | cut -f2,3,4,5,10 | bgzip -c > snp151Common.v2.txt.gz
 
 
 

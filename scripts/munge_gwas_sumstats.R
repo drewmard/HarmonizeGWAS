@@ -8,17 +8,20 @@
 library(jsonlite)
 library(data.table)
 
-# Initialize
-path_to_dbsnp = "/oak/stanford/groups/smontgom/amarder/data/dbsnp" # this could also be: /oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/bin/dbsnp/hg19
-TMPDIR = "/oak/stanford/groups/smontgom/amarder/tmp"
-HEADDIR = "/oak/stanford/groups/smontgom/amarder/HarmonizeGWAS"
-
 # Config path:
 args = commandArgs(trailingOnly=TRUE)
 configFileName = args[1]
 configFileName = "/oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/config/immune.config"
 configFileName = "/oak/stanford/groups/smontgom/amarder/LDSC_pipeline/scripts/new_gwas/munge.config"
 config = fromJSON(configFileName)
+
+# Initialize
+path_to_dbsnp = "/oak/stanford/groups/smontgom/amarder/data/dbsnp" # this could also be: /oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/bin/dbsnp/hg19
+TMPDIR = "/oak/stanford/groups/smontgom/amarder/tmp"
+HEADDIR = "/oak/stanford/groups/smontgom/amarder/HarmonizeGWAS"
+# path_to_dbsnp = config$path_to_dbsnp # this could also be: /oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/bin/dbsnp/hg19
+# TMPDIR = config$TMPDIR
+# HEADDIR = config$HEADDIR
 
 # Source function:
 source(paste0(HEADDIR,"/scripts/dbsnpQuery.R"))
@@ -90,7 +93,7 @@ for (i in 1:length(studies)) {
                     type="chr_pos",
                     tmpdir=TMPDIR,
                     trait=trait,
-                    SNPFILE=paste0(path_to_dbsnp,"/",build,"/snp151.v2.txt.bgz")
+                    SNPFILE=paste0(path_to_dbsnp,"/",build,"/snp151Common.v2.txt.gz")
                     )
   }
   
