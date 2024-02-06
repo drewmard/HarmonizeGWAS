@@ -99,9 +99,9 @@ for (i in 1:length(studies)) {
   
   # Save dataframe to the specified source build (e.g. hg19 or hg38):
   dir.create(paste0(config$output_base_dir),showWarnings = FALSE)
-  dir.create(paste0(config$output_base_dir,study_info$source_build),showWarnings = FALSE)
-  dir.create(paste0(config$output_base_dir,study_info$source_build,"/",trait),showWarnings = FALSE)
-  f.out = paste0(config$output_base_dir,study_info$source_build,"/",trait,"/",trait,".txt.gz")
+  dir.create(paste0(config$output_base_dir,build),showWarnings = FALSE)
+  dir.create(paste0(config$output_base_dir,build,"/",trait),showWarnings = FALSE)
+  f.out = paste0(config$output_base_dir,build,"/",trait,"/",trait,".txt.gz")
   fwrite(df,f.out,quote = F,na = "NA",sep = '\t',row.names = F,col.names = T,compress = "gzip")
   print(paste0("Data frame saved to: ",f.out," ..."))
   
