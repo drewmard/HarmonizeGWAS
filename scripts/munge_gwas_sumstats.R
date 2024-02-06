@@ -12,16 +12,16 @@ library(data.table)
 args = commandArgs(trailingOnly=TRUE)
 configFileName = args[1]
 configFileName = "/oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/config/immune.config"
-configFileName = "/oak/stanford/groups/smontgom/amarder/LDSC_pipeline/scripts/new_gwas/munge.config"
+configFileName = "/oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/config/munge.config"
 config = fromJSON(configFileName)
 
 # Initialize
 path_to_dbsnp = "/oak/stanford/groups/smontgom/amarder/data/dbsnp" # this could also be: /oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/bin/dbsnp/hg19
 TMPDIR = "/oak/stanford/groups/smontgom/amarder/tmp"
 HEADDIR = "/oak/stanford/groups/smontgom/amarder/HarmonizeGWAS"
-# path_to_dbsnp = config$path_to_dbsnp # this could also be: /oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/bin/dbsnp/hg19
-# TMPDIR = config$TMPDIR
-# HEADDIR = config$HEADDIR
+path_to_dbsnp = config$path_to_dbsnp # this could also be: /oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/bin/dbsnp/hg19
+TMPDIR = config$TMPDIR
+HEADDIR = config$HEADDIR
 
 # Source function:
 source(paste0(HEADDIR,"/scripts/dbsnpQuery.R"))
@@ -98,6 +98,8 @@ for (i in 1:length(studies)) {
   }
   
   # Save dataframe to the specified source build (e.g. hg19 or hg38):
+  dir.create(paste0(config$output_base_dir),showWarnings = FALSE)
+  dir.create(paste0(config$output_base_dir,study_info$source_build),showWarnings = FALSE)
   dir.create(paste0(config$output_base_dir,study_info$source_build,"/",trait),showWarnings = FALSE)
   f.out = paste0(config$output_base_dir,study_info$source_build,"/",trait,"/",trait,".txt.gz")
   fwrite(df,f.out,quote = F,na = "NA",sep = '\t',row.names = F,col.names = T,compress = "gzip")
