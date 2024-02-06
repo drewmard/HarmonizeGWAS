@@ -89,12 +89,17 @@ for (i in 1:length(studies)) {
   # Add rsid if needed:
   build = ifelse(is.na(study_info$source_build),config$genome_build,study_info$source_build)
   if (!("rsid" %in% colnames(df))) {
-    df = dbsnpQuery(data_input=df,
-                    type="chr_pos",
-                    tmpdir=TMPDIR,
-                    trait=trait,
-                    SNPFILE=paste0(path_to_dbsnp,"/",build,"/snp151Common.v2.txt.gz")
-                    )
+    # df = dbsnpQuery(data_input=df,
+    #                 type="chr_pos",
+    #                 tmpdir=TMPDIR,
+    #                 trait=trait,
+    #                 SNPFILE=paste0(path_to_dbsnp,"/",build,"/snp151Common.v2.txt.gz")
+    #                 )
+    library(parallel)
+    df$id = unlist(mclapply(mc.cores=8,1:nrow(df),function(i) {
+      # if(i%%10000 == 0){print(i)} 
+      return(paste(df[i,c("chr","snp_pos","non_effect_allele","effect_allele")],collapse = '_'))
+    }))
   }
   
   # Save dataframe to the specified source build (e.g. hg19 or hg38):
@@ -107,7 +112,8 @@ for (i in 1:length(studies)) {
   
   # If build == hg19, also save an hg38 version:
   if (build=="hg19") {
-    cmd = paste0(HEADDIR,"/scripts/liftover_hg19_to_hg38.sh ",trait," ",TMPDIR," ",HEADDIR," ",config$output_base_dir)
+    # cmd = paste0(HEADDIR,"/scripts/liftover_hg19_to_hg38.sh ",trait," ",TMPDIR," ",HEADDIR," ",config$output_base_dir)
+    cmd = paste0(HEADDIR,"/scripts/liftover_hg19_to_hg38.sh ",trait," ",TMPDIR," ",HEADDIR)
     system(cmd)
   }
 }
