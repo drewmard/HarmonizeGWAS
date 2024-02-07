@@ -42,7 +42,6 @@ rm $path_to_downloaded_gwas/hg38/$trait/$trait.txt.gz
 rm $path_to_downloaded_gwas/hg38/$trait/$trait.txt.gz.tbi
 bgzip -f $path_to_downloaded_gwas/hg38/$trait/$trait.txt
 tabix -f -s 2 -b 3 -e 3 -S 1 $path_to_downloaded_gwas/hg38/$trait/$trait.txt.gz
-conda deactivate
 echo "hg38 transformation complete."
 echo "File saved to $path_to_downloaded_gwas/hg38/$trait/$trait.txt.gz"
 
