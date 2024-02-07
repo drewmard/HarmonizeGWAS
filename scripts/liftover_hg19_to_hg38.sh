@@ -5,21 +5,16 @@
 trait=$1
 TMPDIR=$2
 HEADDIR=$3 # HarmonizeGWAS directory
+hg19ToHg38chain=$4
+liftOver=$5
 
-hg19ToHg38chain=/oak/stanford/groups/smontgom/amarder/bin/chain/hg19ToHg38.over.chain.gz
-liftOver=/home/amarder/micromamba/envs/kent-tools/bin/liftOver
+# hg19ToHg38chain=/oak/stanford/groups/smontgom/amarder/bin/chain/hg19ToHg38.over.chain.gz
+# liftOver=/home/amarder/micromamba/envs/kent-tools/bin/liftOver
 path_to_downloaded_gwas=$HEADDIR/out/gwas/munge
-
-# hgBuild=`awk -F, -v pat=$trait '$1~pat {print $7}' /oak/stanford/groups/smontgom/amarder/neuro-variants/scripts/snps/helper_func/colocal.csv`
-
-# if [[ "$hgBuild" == *19* ]]; 
-# then
 
 echo "Running for $trait ..."
 
 mkdir -p $TMPDIR
-
-# path_to_downloaded_gwas=/oak/stanford/groups/smontgom/amarder/LDSC_pipeline/gwas/munge
 mkdir -p $path_to_downloaded_gwas/hg38/$trait
 
 echo "Script: Performing hg19 to hg38 liftOver for sumstats..."

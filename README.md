@@ -79,7 +79,7 @@ The config file is used to specify GWAS summary statistics information.
 
 ## (3) Harmonize GWAS.
 
-This script will reformat the 
+This script will reformat the GWAS file into a common format.
 
 ```
 config=config/immune.config
