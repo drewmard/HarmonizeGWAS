@@ -100,8 +100,8 @@ for (i in 1:length(studies)) {
   
   # Search chr and pos if needed
   if (!("chr" %in% colnames(df))) {
-    test=1 # blank
-    df = dbsnpQuery(data_input=df,trait=trait,rsid_col="rsid",tmpdir=TMPDIR)
+    test=1 # not yet implemented
+    # df = dbsnpQuery(data_input=df,trait=trait,rsid_col="rsid",tmpdir=TMPDIR)
     # df = df[,c("rsid",colnames(df)[colnames(df)!="rsid"])]
   }
   

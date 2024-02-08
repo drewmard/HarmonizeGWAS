@@ -84,9 +84,10 @@ Rscript /oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/scripts/munge_gwas_s
 ## (4) Future to-do.
 
 Code:
-* Map SNPs from author-provided effect/non-effect alleles to reference/alternate alleles (I might have the code to do this in CONVERT_TO_REF portion of the script.)
+* Map SNPs from author-provided effect/non-effect alleles to reference/alternate alleles (I might have the code to do this in CONVERT_TO_REF portion of the script, but not tested.)
 * Map SNPs to RSID. (I don't have a computationally efficient approach for doing this yet.)
 * Map SNPs to SPDI. (I pretty much have code for this last part (spdi.R), but this just takes a while to run.) 
+* Map RSIDs to chr + pos. (I have rough code for this that isn't fully tested in dbsnpQuery.R.)
 
 Application:
 * Does this script work with the following GWAS studies?
