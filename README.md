@@ -5,9 +5,6 @@ This repo contains a basic pipeline for downloading and harmonizing GWAS summary
 ```git clone https://github.com/drewmard/HarmonizeGWAS```
 
 
-
-
-
 ## (0) Pre-requisites.
 
 #### (a) Download liftOver chain file (hg19-->hg38).
@@ -46,8 +43,6 @@ wget https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/snp151Common.txt.g
 zcat snp151Common.txt.gz | cut -f2,3,4,5,10 | bgzip -c > snp151Common.v2.txt.gz
 
 
-
-
 ## (1) Download GWAS.
 
 One way to download GWAS to use the following script:
@@ -75,6 +70,7 @@ This will download the SLE GWAS by Bentham et al. 2015 from the GWAS catalog (th
 ## (2) Modify the config file.
 
 The config file is used to specify GWAS summary statistics information.
+
 
 
 ## (3) Harmonize GWAS.

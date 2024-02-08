@@ -23,9 +23,6 @@ TMPDIR = config$TMPDIR
 HEADDIR = config$HEADDIR
 AUTOSOMAL_ONLY = TRUE
 
-# Source function:
-source(paste0(HEADDIR,"/scripts/dbsnpQuery.R"))
-
 studies = config$studies$study_info
 for (i in 1:length(studies)) {
   
@@ -38,7 +35,6 @@ for (i in 1:length(studies)) {
   
   if (study_info$rsid_index==-1) {
     print("Note: no rsid info in the file!")
-    # rsid = identify_rsid(chrom,snp_pos,effect_allele_index,non_effect_allele_index)
   }
   
   tmp = study_info[,grep("index",colnames(study_info))]
