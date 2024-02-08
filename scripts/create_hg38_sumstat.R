@@ -5,10 +5,6 @@ trait <- args[1]
 TMPDIR <- args[2]
 path_to_downloaded_gwas <- args[3]
 
-# trait="Alzheimer_Wightman_2021"
-# TMPDIR="/oak/stanford/groups/smontgom/amarder/tmp"
-# path_to_downloaded_gwas="/oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/out/gwas/munge"
-
 f.bed_hg38 <- paste0(TMPDIR,"/tmp_hg38.bed")
 f.gwas_hg19 <- paste0(path_to_downloaded_gwas,"/hg19/",trait,"/",trait,".txt.gz")
 
@@ -27,10 +23,6 @@ gwas_hg38 <- gwas_hg38[!is.na(gwas_hg38$snp_pos),]
 
 print("Reordering incase hg19-to-hg38 conversion swapped the order...")
 gwas_hg38 <- gwas_hg38[order(gwas_hg38$chr,gwas_hg38$snp_pos),]
-
-# QC checks:
-# which(bed_hg38$V4[i]!=gwas_hg19$rsid)
-# sum(is.na(bed_hg38$V4[i]))
 
 print("Saving hg38 file...")
 system(paste0('mkdir -p ',path_to_downloaded_gwas,"/hg38/",trait))

@@ -8,6 +8,7 @@
 library(jsonlite)
 library(data.table)
 library(parallel)
+library(dplyr)
 
 # Config path:
 args = commandArgs(trailingOnly=TRUE)
@@ -22,6 +23,7 @@ config = fromJSON(configFileName)
 TMPDIR = config$TMPDIR
 HEADDIR = config$HEADDIR
 AUTOSOMAL_ONLY = TRUE
+CONVERT_TO_REF = FALSE
 
 studies = config$studies$study_info
 for (i in 1:length(studies)) {
@@ -106,6 +108,37 @@ for (i in 1:length(studies)) {
     # cmd = paste0(HEADDIR,"/scripts/liftover_hg19_to_hg38.sh ",trait," ",TMPDIR," ",HEADDIR," ",config$output_base_dir)
     cmd = paste0(HEADDIR,"/scripts/liftover_hg19_to_hg38.sh ",trait," ",TMPDIR," ",HEADDIR," ",config$hg19ToHg38chain," ",config$liftOver)
     system(cmd)
+  }
+  
+  library(BSgenome.Hsapiens.UCSC.hg38)
+  library(plyranges)
+  library(data.table)
+  library(dplyr)
+  
+  df = fread(paste0(config$output_base_dir,"hg38","/",trait,"/",trait,".txt.gz"),data.table = F,stringsAsFactors = F)
+  
+  if (AUTOSOMAL_ONLY) {
+    df = subset(df,chr %in% c(1:22))
+  } else {
+    df = subset(df,chr %in% c(1:22,"X","Y"))
+  }
+  
+  if (CONVERT_TO_REF) {
+    refallele = data.frame(seqnames=paste0("chr",df$chr),start=df$snp_pos,width=1) |> 
+      as_granges() |> 
+      getSeq(x=Hsapiens) %>% as.character()
+    tmp2 = data.frame(chr=df$chr,snp_pos=df$snp_pos,ReferenceAllele=refallele)
+    rm(refallele)
+    
+    ##############
+    
+    source(paste0(HEADDIR,"/scripts/expand_sumstats_via_flip_reverse.R"))
+    sumstat_expanded = expand_sumstats_via_flip_reverse(df)
+    colnames(sumstat_expanded)[colnames(sumstat_expanded)=="non_effect_allele"] = "ReferenceAllele"
+    
+    df = merge(sumstat_expanded,tmp2,by=c('chr',"snp_pos","ReferenceAllele"))
+    df = df[!duplicated(df),]
+    colnames(df)[colnames(df)=="effect_allele"] = "AltAllele"
   }
 }
 

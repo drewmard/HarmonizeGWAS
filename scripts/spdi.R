@@ -12,8 +12,6 @@ if (AUTOSOMAL_ONLY) {
 }
 
 refallele = data.frame(seqnames=paste0("chr",df$chr),start=df$snp_pos,width=1) |> 
-  # refallele = data.frame(seqnames=paste0("chr",chrNum),start=tmp$pos,width=1) |> 
-  # head(1) |>
   as_granges() |> 
   getSeq(x=Hsapiens) %>% as.character()
 tmp2 = data.frame(chr=df$chr,snp_pos=df$snp_pos,ReferenceAllele=refallele)
