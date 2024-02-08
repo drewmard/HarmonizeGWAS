@@ -24,6 +24,7 @@ TMPDIR = config$TMPDIR
 HEADDIR = config$HEADDIR
 AUTOSOMAL_ONLY = TRUE
 CONVERT_TO_REF = FALSE
+source(paste0(HEADDIR,"/scripts/stringSplitter.R"))
 
 studies = config$studies$study_info
 for (i in 1:length(studies)) {
@@ -82,6 +83,8 @@ for (i in 1:length(studies)) {
   }
   colnames(df)[colnames(df)=="effect"] = "beta" # rename if necessary!
   colnames(df)[colnames(df)=="zscore"] = "z" # rename if necessary!
+  if ("non_effect_allele" %in% colnames(df)) {df[,"non_effect_allele"] = toupper(df[,"non_effect_allele"])}
+  if ("effect_allele" %in% colnames(df)) {df[,"effect_allele"] = toupper(df[,"effect_allele"])}
   print(paste0("Summary statistics reformatted..."))
   
   # Add rsid if needed:
@@ -94,6 +97,14 @@ for (i in 1:length(studies)) {
     }))
     df = df[,c("rsid",colnames(df)[colnames(df)!="rsid"])]
   }
+  
+  # Search chr and pos if needed
+  if (!("chr" %in% colnames(df))) {
+    test=1 # blank
+    df = dbsnpQuery(data_input=df,trait=trait,rsid_col="rsid",tmpdir=TMPDIR)
+    # df = df[,c("rsid",colnames(df)[colnames(df)!="rsid"])]
+  }
+  
   
   # Save dataframe to the specified source build (e.g. hg19 or hg38):
   dir.create(paste0(config$output_base_dir),showWarnings = FALSE)
