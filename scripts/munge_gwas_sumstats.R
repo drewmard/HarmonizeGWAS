@@ -101,7 +101,7 @@ for (i in 1:length(studies)) {
   # Search chr and pos if needed
   if (!("chr" %in% colnames(df))) {
     test=1 # not yet implemented
-    # df = dbsnpQuery(data_input=df,trait=trait,rsid_col="rsid",tmpdir=TMPDIR)
+    # df = dbsnpQuery(data_input=df,trait=trait,rsid_col="rsid",tmpdir=TMPDIR,a1_col="non_effect_allele",a2_col="effect_allele")
     # df = df[,c("rsid",colnames(df)[colnames(df)!="rsid"])]
   }
   

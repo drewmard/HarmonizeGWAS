@@ -78,6 +78,8 @@ dbsnpQuery = function(data_input,
                       trait="tmp",
                       SNPFILE="/oak/stanford/groups/smontgom/amarder/data/dbsnp/hg19/snp151.v2.txt.gz",
                       rsid_col="RSID",
+                      a1_col="A1",
+                      a2_col="A2",
                       ignoreAlleles=FALSE) {
   if (type=="rsid") {
     
@@ -100,7 +102,7 @@ dbsnpQuery = function(data_input,
 
     # Read in RSID info and QC:
     RSIDINFO = fread(MAPFILE,data.table = F,stringsAsFactors = F)
-    colnames(RSIDINFO) = c("CHR","POS","RSID","A1/A2")
+    colnames(RSIDINFO) = c("CHR","START","POS","RSID","A1/A2")
     RSIDINFO$CHR = sub("chr","",RSIDINFO$CHR)
     RSIDINFO = stringSplitter(RSIDINFO,
                               column_to_use = "A1/A2",
@@ -116,10 +118,10 @@ dbsnpQuery = function(data_input,
     # Merge data input and dbsnp
     if (!ignoreAlleles) {
       data_input[,"tmp"] = 1:nrow(data_input)
-      data_input1a = merge(data_input[,!(colnames(data_input)%in%c("CHR","POS"))],RSIDINFO,by=c("RSID","A1","A2"))
-      data_input1b = merge(data_input[,!(colnames(data_input)%in%c("CHR","POS"))],RSIDINFO,by.x=c("RSID","A1","A2"),by.y=c("RSID","A2","A1"))
+      data_input1a = merge(data_input[,!(colnames(data_input)%in%c("CHR","POS"))],RSIDINFO,by.x=c(rsid_col,a1_col,a2_col),by.y=c("RSID","A1","A2"))
+      data_input1b = merge(data_input[,!(colnames(data_input)%in%c("CHR","POS"))],RSIDINFO,by.x=c(rsid_col,a1_col,a2_col),by.y=c("RSID","A2","A1"))
       data_input1 = as.data.frame(rbind(data_input1a,data_input1b))
-      data_input1c = merge(subset(data_input,!(RSID %in% data_input1$RSID))[,!(colnames(data_input)%in%c("CHR","POS"))],RSIDINFO[,!(colnames(RSIDINFO)%in%c("A1","A2"))],by="RSID")
+      data_input1c = merge(subset(data_input,!(data_input[,rsid_col] %in% data_input1[,rsid_col]))[,!(colnames(data_input)%in%c("CHR","POS"))],RSIDINFO[,!(colnames(RSIDINFO)%in%c("A1","A2"))],by.x=rsid_col,by.y="RSID")
       data_input1 = as.data.frame(rbind(data_input1,data_input1c))
       data_input1d = subset(data_input,!(tmp %in% data_input1$tmp))     # data_input1d = subset(data_input,!(RSID %in% data_input1$RSID))
       data_input1 = as.data.frame(rbind(data_input1,data_input1d))
