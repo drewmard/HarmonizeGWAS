@@ -117,7 +117,7 @@ for (i in 1:length(studies)) {
   # If build == hg19, also save an hg38 version:
   if (build=="hg19") {
     # cmd = paste0(HEADDIR,"/scripts/liftover_hg19_to_hg38.sh ",trait," ",TMPDIR," ",HEADDIR," ",config$output_base_dir)
-    cmd = paste0(HEADDIR,"/scripts/liftover_hg19_to_hg38.sh ",trait," ",TMPDIR," ",HEADDIR," ",config$hg19ToHg38chain," ",config$liftOver)
+    cmd = paste0(HEADDIR,"/scripts/liftover_hg19_to_hg38.sh ",trait," ",TMPDIR," ",HEADDIR," ",config$output_base_dir," ",config$hg19ToHg38chain," ",config$liftOver)
     system(cmd)
   }
   
