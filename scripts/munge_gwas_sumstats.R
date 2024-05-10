@@ -9,6 +9,9 @@ library(jsonlite)
 library(data.table)
 library(parallel)
 library(dplyr)
+library(BSgenome.Hsapiens.UCSC.hg38)
+library(plyranges)
+
 
 # Config path:
 args = commandArgs(trailingOnly=TRUE)
@@ -23,9 +26,10 @@ config = fromJSON(configFileName)
 TMPDIR = config$TMPDIR
 HEADDIR = config$HEADDIR
 AUTOSOMAL_ONLY = TRUE
-CONVERT_TO_REF = FALSE
+CONVERT_TO_REF = TRUE
 source(paste0(HEADDIR,"/scripts/stringSplitter.R"))
 
+num_cores <- detectCores()
 studies = config$studies$study_info
 for (i in 1:length(studies)) {
   
@@ -87,23 +91,23 @@ for (i in 1:length(studies)) {
   if ("effect_allele" %in% colnames(df)) {df[,"effect_allele"] = toupper(df[,"effect_allele"])}
   print(paste0("Summary statistics reformatted..."))
   
-  # Add rsid if needed:
-  build = ifelse(is.na(study_info$source_build),config$genome_build,study_info$source_build)
-  if (!("rsid" %in% colnames(df))) {
-    # Specify rsid as chr, snp_pos, non_effect_allele, effect_allele
-    df$rsid = unlist(mclapply(mc.cores=8,1:nrow(df),function(i) {
-      # if(i%%10000 == 0){print(i)} 
-      return(paste(df[i,c("chr","snp_pos","non_effect_allele","effect_allele")],collapse = '_'))
-    }))
-    df = df[,c("rsid",colnames(df)[colnames(df)!="rsid"])]
-  }
-  
-  # Search chr and pos if needed
-  if (!("chr" %in% colnames(df))) {
-    test=1 # not yet implemented
-    # df = dbsnpQuery(data_input=df,trait=trait,rsid_col="rsid",tmpdir=TMPDIR,a1_col="non_effect_allele",a2_col="effect_allele")
-    # df = df[,c("rsid",colnames(df)[colnames(df)!="rsid"])]
-  }
+  # # Add rsid if needed:
+  # build = ifelse(is.na(study_info$source_build),config$genome_build,study_info$source_build)
+  # if (!("rsid" %in% colnames(df))) {
+  #   # Specify rsid as chr, snp_pos, non_effect_allele, effect_allele
+  #   df$rsid = unlist(mclapply(mc.cores=8,1:nrow(df),function(i) {
+  #     # if(i%%10000 == 0){print(i)} 
+  #     return(paste(df[i,c("chr","snp_pos","non_effect_allele","effect_allele")],collapse = '_'))
+  #   }))
+  #   df = df[,c("rsid",colnames(df)[colnames(df)!="rsid"])]
+  # }
+  # 
+  # # Search chr and pos if needed
+  # if (!("chr" %in% colnames(df))) {
+  #   test=1 # not yet implemented
+  #   # df = dbsnpQuery(data_input=df,trait=trait,rsid_col="rsid",tmpdir=TMPDIR,a1_col="non_effect_allele",a2_col="effect_allele")
+  #   # df = df[,c("rsid",colnames(df)[colnames(df)!="rsid"])]
+  # }
   
   
   # Save dataframe to the specified source build (e.g. hg19 or hg38):
@@ -120,12 +124,7 @@ for (i in 1:length(studies)) {
     cmd = paste0(HEADDIR,"/scripts/liftover_hg19_to_hg38.sh ",trait," ",TMPDIR," ",HEADDIR," ",config$output_base_dir," ",config$hg19ToHg38chain," ",config$liftOver)
     system(cmd)
   }
-  
-  library(BSgenome.Hsapiens.UCSC.hg38)
-  library(plyranges)
-  library(data.table)
-  library(dplyr)
-  
+
   df = fread(paste0(config$output_base_dir,"hg38","/",trait,"/",trait,".txt.gz"),data.table = F,stringsAsFactors = F)
   
   if (AUTOSOMAL_ONLY) {
@@ -135,21 +134,19 @@ for (i in 1:length(studies)) {
   }
   
   if (CONVERT_TO_REF) {
-    refallele = data.frame(seqnames=paste0("chr",df$chr),start=df$snp_pos,width=1) |> 
-      as_granges() |> 
-      getSeq(x=Hsapiens) %>% as.character()
-    tmp2 = data.frame(chr=df$chr,snp_pos=df$snp_pos,ReferenceAllele=refallele)
-    rm(refallele)
     
-    ##############
-    
-    source(paste0(HEADDIR,"/scripts/expand_sumstats_via_flip_reverse.R"))
-    sumstat_expanded = expand_sumstats_via_flip_reverse(df)
-    colnames(sumstat_expanded)[colnames(sumstat_expanded)=="non_effect_allele"] = "ReferenceAllele"
-    
-    df = merge(sumstat_expanded,tmp2,by=c('chr',"snp_pos","ReferenceAllele"))
-    df = df[!duplicated(df),]
-    colnames(df)[colnames(df)=="effect_allele"] = "AltAllele"
+    source(paste0(HEADDIR,"/scripts/convert_to_ref_alt.R"))
+    df = convert_to_ref_alt(df)
+  } else {
+    df$snp_id = unlist(
+      mclapply(
+        1:nrow(df),
+        function(i) paste(
+          df$chr[i],df$snp_pos[i],df$ReferenceAllele[i],df$AltAllele[i],sep = "_"
+        ),
+        mc.cores = 8
+      )
+    )
   }
 }
 

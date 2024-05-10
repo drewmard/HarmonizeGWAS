@@ -49,6 +49,8 @@ expand_sumstats_via_flip_reverse <- function(ss) {
   ss4$effect_allele <- flip_strand(ss4$effect_allele)
   ss4$non_effect_allele <- flip_strand(ss4$non_effect_allele)
   
+  # for 
+  
   #ss4 becomes original + reversed + strand flip original + strand flip reverse sumstats
   ss4 <- rbind(ss3, ss4) ######
   return(ss4)
