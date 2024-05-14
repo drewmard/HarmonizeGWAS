@@ -23,6 +23,8 @@ convert_to_ref_alt = function(df) {
   refallele = data.frame(seqnames=paste0("chr",df$chr),start=df$snp_pos,width=1) |> 
     as_granges() |> 
     getSeq(x=Hsapiens) %>% as.character()
+  # consider modifying to submit X SNPs at a time:
+  # ???????????
   tmp2 = data.frame(chr=df$chr,snp_pos=df$snp_pos,ReferenceAllele=refallele)
 
   # Flip & reverse sumstats, and then merge w/ ref allele matching:

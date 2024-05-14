@@ -125,42 +125,31 @@ for (i in 1:length(studies)) {
     system(cmd)
   }
 
-  df = fread(paste0(config$output_base_dir,"hg38","/",trait,"/",trait,".txt.gz"),data.table = F,stringsAsFactors = F)
-  
-  if (AUTOSOMAL_ONLY) {
-    df = subset(df,chr %in% c(1:22))
-  } else {
-    df = subset(df,chr %in% c(1:22,"X","Y"))
-  }
+  # if (AUTOSOMAL_ONLY) {
+  #   df = subset(df,chr %in% c(1:22))
+  # } else {
+  #   df = subset(df,chr %in% c(1:22,"X","Y"))
+  # }
   
   if (CONVERT_TO_REF) {
     
-    source(paste0(HEADDIR,"/scripts/convert_to_ref_alt.R"))
+    df = fread(paste0(config$output_base_dir,"hg38","/",trait,"/",trait,".txt.gz"),data.table = F,stringsAsFactors = F)
+    source(paste0(HEADDIR,"/scripts/convert_to_ref_alt_1kg.R"))
     
     df.lst = list()
-    for (chrUse in 1:22) {
+    for (chrUse in 22:1) {
       print(paste0("Running chr ",chrUse,"..."))
-      
       df.lst[[chrUse]] = convert_to_ref_alt_1kg(df,chrNum=chrUse)
     }
-    
-    chunk_size=10000
-    idx = seq(1,nrow(df),by=chunk_size)
-    df.lst = list()
-    for (j in 222:(length(idx))) {
-      start=idx[j]
-      end = start+(chunk_size-1)
-      print(paste0(nrow(df)," rows: running idx ",start,"-",end,"..."))
-      # df[start:end,] = convert_to_ref_alt(df[start:end,])
-      df.lst[[j]] = convert_to_ref_alt(df[start:end,])
-    }
+    # saveRDS(df.lst,"/oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/out/gwas/munge/hg38/Alzheimers_Bellenguez_2022/tmp.rds")
     df = as.data.frame(do.call(rbind,df.lst))
+    fwrite(df,paste0(config$output_base_dir,"hg38","/",trait,"/",trait,".v2.txt.gz"))
   } else {
     df$snp_id = unlist(
       mclapply(
         1:nrow(df),
         function(i) paste(
-          df$chr[i],df$snp_pos[i],df$ReferenceAllele[i],df$AltAllele[i],sep = "_"
+          df$chr[i],df$snp_pos[i],df$non_effect_allele[i],df$effect_allele[i],sep = "_"
         ),
         mc.cores = 8
       )
