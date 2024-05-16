@@ -5,7 +5,8 @@ convert_to_ref_alt_1kg = function(df,chrNum) {
   # Betas are convert to refer to the alt allele.
   
   # Fetch reference alleles:
-  f.geno=paste0("/oak/stanford/groups/smontgom/amarder/bin/1kg/30x/plink_indel/1kg.all.hg38_30x.chr",chrNum,".bim")
+  # f.geno=paste0("/oak/stanford/groups/smontgom/amarder/bin/1kg/30x/plink_indel/1kg.all.hg38_30x.chr",chrNum,".bim")
+  f.geno=paste0("/oak/stanford/groups/akundaje/soumyak/refs/plink_eur_1kg_30x_hg38_snvs_indels/chr",chrNum,".eur.filtered.bim")
   geno <- fread(f.geno,data.table = F,stringsAsFactors = F)#, verbose = FALSE)
   colnames(geno)[c(1,4,6,5)] = c("chr","pos","a0","a1")
   
@@ -57,12 +58,13 @@ convert_to_ref_alt_1kg = function(df,chrNum) {
   rm(tmp2);rm(tmp3)
   
   # SNP ids for identity:
-  num_cores <- detectCores()
+  num_cores <- detectCores()/2
   sumstats$snp_id = unlist(
     mclapply(
       1:nrow(sumstats),
       function(i) paste(
-        sumstats$chr[i],sumstats$pos[i],sumstats$A0[i],sumstats$A1[i],sep = "_"
+        # sumstats$chr[i],sumstats$pos[i],sumstats$A0[i],sumstats$A1[i],sep = "_"
+        sumstats$chr[i],sumstats$pos[i],sumstats$A0[i],sumstats$A1[i],sep = ":"
       ),
       mc.cores = num_cores
     )
@@ -70,6 +72,8 @@ convert_to_ref_alt_1kg = function(df,chrNum) {
 
   # order:
   sumstats = sumstats[order(sumstats$iden),]
+  colnames(sumstats)[colnames(sumstats)=="pos"] <- "snp_pos"
+  
   
   return(sumstats)
 }

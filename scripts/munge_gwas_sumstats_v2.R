@@ -143,7 +143,8 @@ for (i in 1:length(studies)) {
     }
     # saveRDS(df.lst,"/oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/out/gwas/munge/hg38/Alzheimers_Bellenguez_2022/tmp.rds")
     df = as.data.frame(do.call(rbind,df.lst))
-    fwrite(df,paste0(config$output_base_dir,"hg38","/",trait,"/",trait,".v2.txt.gz"))
+    f.out = paste0(config$output_base_dir,"hg38","/",trait,"/",trait,".v2.txt.gz")
+    fwrite(df,f.out,quote = F,na = "NA",sep = '\t',row.names = F,col.names = T,compress = "gzip")
   } else {
     df$snp_id = unlist(
       mclapply(
