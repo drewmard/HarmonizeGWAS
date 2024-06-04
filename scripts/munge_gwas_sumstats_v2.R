@@ -145,7 +145,16 @@ for (i in 1:length(studies)) {
     df.lst = list()
     for (chrUse in 22:1) {
       print(paste0("Running chr ",chrUse,"..."))
-      df.lst[[chrUse]] = convert_to_ref_alt_1kg(df,chrNum=chrUse)
+      repeat {
+        result <- tryCatch({
+          convert_to_ref_alt_1kg(df,chrNum=chrUse,parallel=TRUE)
+        }, error = function(e) {
+          NULL
+        })
+        
+        if (!is.null(result)) break
+      }
+      df.lst[[chrUse]] = result
     }
     # saveRDS(df.lst,"/oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/out/gwas/munge/hg38/Alzheimers_Bellenguez_2022/tmp.rds")
     df = as.data.frame(do.call(rbind,df.lst))
