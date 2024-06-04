@@ -21,7 +21,7 @@ library(plyranges)
 args = commandArgs(trailingOnly=TRUE)
 configFileName = args[1]
 # configFileName = "/oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/config/immune.config"
-# configFileName = "/oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/config/munge.config"
+configFileName = "/oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/config/munge.config"
 config = fromJSON(configFileName)
 
 # Initialize
@@ -99,22 +99,6 @@ for (i in 1:length(studies)) {
   
   # # Add rsid if needed:
   build = ifelse(is.na(study_info$source_build),config$genome_build,study_info$source_build)
-  # if (!("rsid" %in% colnames(df))) {
-  #   # Specify rsid as chr, snp_pos, non_effect_allele, effect_allele
-  #   df$rsid = unlist(mclapply(mc.cores=8,1:nrow(df),function(i) {
-  #     # if(i%%10000 == 0){print(i)} 
-  #     return(paste(df[i,c("chr","snp_pos","non_effect_allele","effect_allele")],collapse = '_'))
-  #   }))
-  #   df = df[,c("rsid",colnames(df)[colnames(df)!="rsid"])]
-  # }
-  # 
-  # # Search chr and pos if needed
-  # if (!("chr" %in% colnames(df))) {
-  #   test=1 # not yet implemented
-  #   # df = dbsnpQuery(data_input=df,trait=trait,rsid_col="rsid",tmpdir=TMPDIR,a1_col="non_effect_allele",a2_col="effect_allele")
-  #   # df = df[,c("rsid",colnames(df)[colnames(df)!="rsid"])]
-  # }
-  
   
   # Save dataframe to the specified source build (e.g. hg19 or hg38):
   dir.create(paste0(config$output_base_dir),showWarnings = FALSE)
@@ -131,11 +115,11 @@ for (i in 1:length(studies)) {
     system(cmd)
   }
 
-  # if (AUTOSOMAL_ONLY) {
-  #   df = subset(df,chr %in% c(1:22))
-  # } else {
-  #   df = subset(df,chr %in% c(1:22,"X","Y"))
-  # }
+  if (AUTOSOMAL_ONLY) {
+    df = subset(df,chr %in% c(1:22))
+  } else {
+    df = subset(df,chr %in% c(1:22,"X","Y"))
+  }
   
   if (CONVERT_TO_REF) {
     
