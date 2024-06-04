@@ -1,9 +1,13 @@
+#
 # GWAS Munge Pipeline!
 # this is a modified pipeline from Mike Gloudesman
 # the issue with Mike's python pipeline was that if SNPs gained a new rsid but were retained between hg19 --> hg38
 # they would be dropped because the rsid would be different
 # however, liftover should be done on the coordinates
 # and then new rsid's assigned!
+
+# srun --account=smontgom --partition=batch --time=24:00:00 --mem=64G --nodes=1 --ntasks=1 --cpus-per-task=1 --pty bash 
+# conda activate /oak/stanford/groups/smontgom/amarder/micromamba/envs/HarmonizeGWAS
 
 library(jsonlite)
 library(data.table)
@@ -66,8 +70,9 @@ for (i in 1:length(studies)) {
   idx = as.numeric(unlist(study_info[,cols_to_use_ordered]))
   
   # Read in sum stats:
-  f = paste0(config$input_base_dir,"/",trait,"/",trait,".txt.gz")
-  df = fread(f,data.table = F,stringsAsFactors = F)
+  f = paste0(config$input_base_dir,trait,"/",trait,".txt.gz")
+  # f = paste0(config$input_base_dir,"/",trait,"/",trait,".txt.gz")
+  df = fread(f,data.table = F,stringsAsFactors = F,fill = TRUE)
   print(paste0("Summary statistics read into memory..."))
   
   # Reformat:
@@ -92,7 +97,7 @@ for (i in 1:length(studies)) {
   print(paste0("Summary statistics reformatted..."))
   
   # # Add rsid if needed:
-  # build = ifelse(is.na(study_info$source_build),config$genome_build,study_info$source_build)
+  build = ifelse(is.na(study_info$source_build),config$genome_build,study_info$source_build)
   # if (!("rsid" %in% colnames(df))) {
   #   # Specify rsid as chr, snp_pos, non_effect_allele, effect_allele
   #   df$rsid = unlist(mclapply(mc.cores=8,1:nrow(df),function(i) {
@@ -150,7 +155,7 @@ for (i in 1:length(studies)) {
       mclapply(
         1:nrow(df),
         function(i) paste(
-          df$chr[i],df$snp_pos[i],df$non_effect_allele[i],df$effect_allele[i],sep = "_"
+          paste0("chr",df$chr[i]),df$snp_pos[i],df$non_effect_allele[i],df$effect_allele[i],sep = "_"
         ),
         mc.cores = 8
       )

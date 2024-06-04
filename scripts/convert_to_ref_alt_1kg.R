@@ -64,7 +64,7 @@ convert_to_ref_alt_1kg = function(df,chrNum) {
       1:nrow(sumstats),
       function(i) paste(
         # sumstats$chr[i],sumstats$pos[i],sumstats$A0[i],sumstats$A1[i],sep = "_"
-        sumstats$chr[i],sumstats$pos[i],sumstats$A0[i],sumstats$A1[i],sep = ":"
+        paste0("chr",sumstats$chr[i]),sumstats$pos[i],sumstats$A0[i],sumstats$A1[i],sep = ":"
       ),
       mc.cores = num_cores
     )
