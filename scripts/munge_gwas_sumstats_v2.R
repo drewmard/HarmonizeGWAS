@@ -65,6 +65,7 @@ for (i in 1:length(studies)) {
                     "non_effect_allele_index","effect_allele_index",
                     "effect_index","or_index","se_index","zscore_index",
                     "pvalue_index","log_pvalue_index","neg_log_pvalue_index",
+                    "freq_index",
                     "direction_index")
   cols_to_use_ordered = desired_order[desired_order %in% cols_to_use]
   idx = as.numeric(unlist(study_info[,cols_to_use_ordered]))

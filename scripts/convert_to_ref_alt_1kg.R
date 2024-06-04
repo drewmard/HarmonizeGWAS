@@ -1,4 +1,4 @@
-convert_to_ref_alt_1kg = function(df,chrNum) {
+convert_to_ref_alt_1kg = function(df,chrNum,parallel=FALSE) {
   
   # This function aligns GWAS sumstat file to the reference genome.
   # Therefore, ref/alt alleles are used instead of effect allele notation.
@@ -58,18 +58,30 @@ convert_to_ref_alt_1kg = function(df,chrNum) {
   rm(tmp2);rm(tmp3)
   
   # SNP ids for identity:
-  num_cores <- detectCores()/2
-  sumstats$snp_id = unlist(
-    mclapply(
-      1:nrow(sumstats),
-      function(i) paste(
-        # sumstats$chr[i],sumstats$pos[i],sumstats$A0[i],sumstats$A1[i],sep = "_"
-        paste0("chr",sumstats$chr[i]),sumstats$pos[i],sumstats$A0[i],sumstats$A1[i],sep = ":"
-      ),
-      mc.cores = num_cores
+  if (parallel) {
+    num_cores <- detectCores()/2
+    sumstats$snp_id = unlist(
+      mclapply(
+        1:nrow(sumstats),
+        function(i) paste(
+          # sumstats$chr[i],sumstats$pos[i],sumstats$A0[i],sumstats$A1[i],sep = "_"
+          paste0("chr",sumstats$chr[i]),sumstats$pos[i],sumstats$A0[i],sumstats$A1[i],sep = ":"
+        ),
+        mc.cores = num_cores
+      )
     )
-  )
-
+  } else {
+    sumstats$snp_id = unlist(
+      lapply(
+        1:nrow(sumstats),
+        function(i) paste(
+          # sumstats$chr[i],sumstats$pos[i],sumstats$A0[i],sumstats$A1[i],sep = "_"
+          paste0("chr",sumstats$chr[i]),sumstats$pos[i],sumstats$A0[i],sumstats$A1[i],sep = ":"
+        )
+      )
+    )
+  }
+  
   # order:
   sumstats = sumstats[order(sumstats$iden),]
   colnames(sumstats)[colnames(sumstats)=="pos"] <- "snp_pos"
