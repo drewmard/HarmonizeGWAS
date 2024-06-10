@@ -6,7 +6,7 @@
 # however, liftover should be done on the coordinates
 # and then new rsid's assigned!
 
-# srun --account=smontgom --partition=batch --time=24:00:00 --mem=64G --nodes=1 --ntasks=1 --cpus-per-task=1 --pty bash 
+# srun --account=default --partition=interactive --time=24:00:00 --mem=64G --nodes=1 --ntasks=1 --cpus-per-task=1 --pty bash 
 # conda activate /oak/stanford/groups/smontgom/amarder/micromamba/envs/HarmonizeGWAS
 
 library(jsonlite)
@@ -35,7 +35,7 @@ source(paste0(HEADDIR,"/scripts/stringSplitter.R"))
 
 num_cores <- detectCores()
 studies = config$studies$study_info
-for (i in 1:length(studies)) {
+for (i in 7:length(studies)) {
   
   # initialize:
   trait = studies[i]
@@ -73,7 +73,10 @@ for (i in 1:length(studies)) {
   # Read in sum stats:
   f = paste0(config$input_base_dir,trait,"/",trait,".txt.gz")
   # f = paste0(config$input_base_dir,"/",trait,"/",trait,".txt.gz")
-  df = fread(f,data.table = F,stringsAsFactors = F,fill = TRUE)
+  # df = fread(f,data.table = F,stringsAsFactors = F,fill = TRUE,sep = study_info$delimiter)
+  # df = fread(f,data.table = F,stringsAsFactors = F,sep = study_info$delimiter)
+  df = fread(f,data.table = F,stringsAsFactors = F)
+  
   print(paste0("Summary statistics read into memory..."))
   
   # Reformat:
@@ -123,7 +126,7 @@ for (i in 1:length(studies)) {
   
   if (CONVERT_TO_REF) {
     
-    df = fread(paste0(config$output_base_dir,"hg38","/",trait,"/",trait,".txt.gz"),data.table = F,stringsAsFactors = F)
+    # df = fread(paste0(config$output_base_dir,"hg38","/",trait,"/",trait,".txt.gz"),data.table = F,stringsAsFactors = F)
     source(paste0(HEADDIR,"/scripts/convert_to_ref_alt_1kg.R"))
     
     df.lst = list()
