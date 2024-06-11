@@ -16,7 +16,6 @@ library(dplyr)
 library(BSgenome.Hsapiens.UCSC.hg38)
 library(plyranges)
 
-
 # Config path:
 args = commandArgs(trailingOnly=TRUE)
 configFileName = args[1]
@@ -101,6 +100,9 @@ for (i in 7:length(studies)) {
   print(paste0("Summary statistics reformatted..."))
   
   # # Add rsid if needed:
+  ## not implemented
+  
+  # Specify build:
   build = ifelse(is.na(study_info$source_build),config$genome_build,study_info$source_build)
   
   # Save dataframe to the specified source build (e.g. hg19 or hg38):
