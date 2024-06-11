@@ -43,7 +43,7 @@ for (i in 7:length(studies)) {
   # Pull out columns specified (not NULL):
   study_info = subset(config$studies,study_info==trait)
   
-  if (study_info$rsid_index==-1) {
+  if (is.na(study_info$rsid_index) | study_info$rsid_index==-1) {
     print("Note: no rsid info in the file!")
   }
   
