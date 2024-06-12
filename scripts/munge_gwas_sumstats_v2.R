@@ -20,7 +20,7 @@ library(plyranges)
 args = commandArgs(trailingOnly=TRUE)
 configFileName = args[1]
 # configFileName = "/oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/config/immune.config"
-configFileName = "/oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/config/munge.config"
+configFileName = "/oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/config/munge2.config"
 config = fromJSON(configFileName)
 
 # Initialize
