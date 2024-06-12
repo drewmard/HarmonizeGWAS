@@ -38,7 +38,7 @@ for (i in 1:length(studies)) {
   
   # initialize:
   trait = studies[i]
-  print(paste0("Running trait: ",trait,"..."))
+  print(paste0("Running trait",i,"/",length(studies),": ",trait,"..."))
   
   # Pull out columns specified (not NULL):
   study_info = subset(config$studies,study_info==trait)
