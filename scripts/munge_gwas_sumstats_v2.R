@@ -34,7 +34,7 @@ source(paste0(HEADDIR,"/scripts/stringSplitter.R"))
 
 num_cores <- detectCores()
 studies = config$studies$study_info
-for (i in 7:length(studies)) {
+for (i in 1:length(studies)) {
   
   # initialize:
   trait = studies[i]
@@ -58,7 +58,7 @@ for (i in 7:length(studies)) {
   } else if ("neg_log_pvalue_index" %in% cols_to_use)  {
     cols_to_use = cols_to_use
   }
-
+  
   # Rearrange dataframe in desired order:
   desired_order = c("rsid_index","chr_index","snp_pos_index",
                     "non_effect_allele_index","effect_allele_index",
@@ -100,6 +100,9 @@ for (i in 7:length(studies)) {
   print(paste0("Summary statistics reformatted..."))
   
   # # Add rsid if needed:
+  if (!("rsid" %in% colnames(df))) {df[,"rsid"] = paste0("snp",1:nrow(df))}
+  df = df %>% select(rsid,everything())
+  
   ## not implemented
   
   # Specify build:
@@ -110,8 +113,56 @@ for (i in 7:length(studies)) {
   dir.create(paste0(config$output_base_dir,build),showWarnings = FALSE)
   dir.create(paste0(config$output_base_dir,build,"/",trait),showWarnings = FALSE)
   f.out = paste0(config$output_base_dir,build,"/",trait,"/",trait,".txt.gz")
+  options(scipen = 999)
   fwrite(df,f.out,quote = F,na = "NA",sep = '\t',row.names = F,col.names = T,compress = "gzip")
+  options(scipen = 0)
   print(paste0("Data frame saved to: ",f.out," ..."))
+  
+  # dbsnp = fread("/oak/stanford/groups/smontgom/mgloud/projects/gwas-download/gwas-download/munge/dbsnp/sorted_1kg_matched_hg38_snp150.txt.gz",data.table = F,stringsAsFactors = F)
+  # y=paste(dbsnp$V1,dbsnp$V2)
+  # dbsnp = dbsnp[!duplicated(y),]
+  # dbsnp$V1 = substring(dbsnp$V1,4)
+  # fwrite(dbsnp,"/oak/stanford/groups/smontgom/amarder/data/dbsnp/hg38/sorted_1kg_matched_hg38_snp150.no_dup.txt.gz",compress = "gzip",quote = F,sep = '\t',row.names = F,col.names = F,na = "NA")
+  
+  # # Function to process a batch of SNPs
+  # process_batch <- function(df_batch, tbx) {
+  #   param <- GRanges(df_batch$chr, IRanges(df_batch$snp_pos - 1, df_batch$snp_pos))
+  #   result <- scanTabix(tbx, param=param)
+  #   
+  #   match_data <- lapply(seq_along(result), function(i) {
+  #     matches <- result[[i]]
+  #     if (length(matches) > 0) {
+  #       match_list <- strsplit(matches, "\t")
+  #       do.call(rbind, lapply(match_list, function(match) {
+  #         data.frame(
+  #           chr = match[1],
+  #           pos = as.integer(match[2]),
+  #           a1 = match[4],
+  #           a2 = match[5],
+  #           rsid = match[3],
+  #           stringsAsFactors = FALSE
+  #         )
+  #       }))
+  #     } else {
+  #       NULL
+  #     }
+  #   })
+  #   do.call(rbind, match_data)
+  # }
+  # 
+  # library(Rsamtools)
+  # # Specify the path to the Tabix file
+  # tabix_file <- paste0("/oak/stanford/groups/akundaje/soumyak/refs/dbsnp_hg38/","hg38",".dbsnp156.gz")
+  # open(tbx)
+  # 
+  # # Split the data frame into batches
+  # batch_size <- 100
+  # df_batches <- split(df[1:5000,], as.factor(ceiling(seq_len(1000) / batch_size)))
+  # match_data_list <- lapply(df_batches, process_batch, tbx = tbx)
+  # match_data <- do.call(rbind, match_data_list)
+  # 
+  # # Close the Tabix file
+  # close(tbx)
   
   # If build == hg19, also save an hg38 version:
   if (build=="hg19") {
@@ -119,7 +170,17 @@ for (i in 7:length(studies)) {
     cmd = paste0(HEADDIR,"/scripts/liftover_hg19_to_hg38.sh ",trait," ",TMPDIR," ",HEADDIR," ",config$output_base_dir," ",config$hg19ToHg38chain," ",config$liftOver)
     system(cmd)
   }
-
+  
+  # Read in hg38 dataset:
+  df = fread(paste0(config$output_base_dir,"hg38","/",trait,"/",trait,".txt.gz"),data.table = F,stringsAsFactors = F)
+  
+  if (!(rsid %in% colnames(df))) {
+    print("Crudely adding RSIDs...")
+    dbsnp = fread("/oak/stanford/groups/smontgom/amarder/data/dbsnp/hg38/sorted_1kg_matched_hg38_snp150.no_dup.txt.gz",data.table = F,stringsAsFactors = F)
+    df = merge(df[,colnames(df)!="V3"],dbsnp,by=c("chr","snp_pos"),by.y=c("V1","V2"),all.x = TRUE)
+    colnames(df)[colnames(df)=="V3"] = "rsid"
+  }
+  
   if (AUTOSOMAL_ONLY) {
     df = subset(df,chr %in% c(1:22))
   } else {
@@ -128,24 +189,27 @@ for (i in 7:length(studies)) {
   
   if (CONVERT_TO_REF) {
     
-    # df = fread(paste0(config$output_base_dir,"hg38","/",trait,"/",trait,".txt.gz"),data.table = F,stringsAsFactors = F)
     source(paste0(HEADDIR,"/scripts/convert_to_ref_alt_1kg.R"))
     
     df.lst = list()
+    # for (chrUse in 22:1) {
     for (chrUse in 22:1) {
       print(paste0("Running chr ",chrUse,"..."))
+      attempt = 0
       repeat {
-        result <- tryCatch({
-          convert_to_ref_alt_1kg(df,chrNum=chrUse,parallel=TRUE)
-        }, error = function(e) {
-          NULL
-        })
-        
+        attempt = attempt + 1
+        if (attempt >= 2) {result = convert_to_ref_alt_1kg(df,chrNum=chrUse,parallel=FALSE)}
+        else {
+          result <- tryCatch({
+            convert_to_ref_alt_1kg(df,chrNum=chrUse,parallel=TRUE)
+          }, error = function(e) {
+            NULL
+          })
+        }
         if (!is.null(result)) break
       }
       df.lst[[chrUse]] = result
     }
-    # saveRDS(df.lst,"/oak/stanford/groups/smontgom/amarder/HarmonizeGWAS/out/gwas/munge/hg38/Alzheimers_Bellenguez_2022/tmp.rds")
     df = as.data.frame(do.call(rbind,df.lst))
     f.out = paste0(config$output_base_dir,"hg38","/",trait,"/",trait,".v2.txt.gz")
     fwrite(df,f.out,quote = F,na = "NA",sep = '\t',row.names = F,col.names = T,compress = "gzip")
