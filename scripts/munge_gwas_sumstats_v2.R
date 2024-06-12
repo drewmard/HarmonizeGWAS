@@ -103,8 +103,6 @@ for (i in 1:length(studies)) {
   if (!("rsid" %in% colnames(df))) {df[,"rsid"] = paste0("snp",1:nrow(df))}
   df = df %>% select(rsid,everything())
   
-  ## not implemented
-  
   # Specify build:
   build = ifelse(is.na(study_info$source_build),config$genome_build,study_info$source_build)
   
@@ -174,8 +172,8 @@ for (i in 1:length(studies)) {
   # Read in hg38 dataset:
   df = fread(paste0(config$output_base_dir,"hg38","/",trait,"/",trait,".txt.gz"),data.table = F,stringsAsFactors = F)
   
-  if (!(rsid %in% colnames(df))) {
-    print("Crudely adding RSIDs...")
+  if (!("rsid_index" %in% cols_to_use)) {
+    print("Crudely adding RSIDs... (not matching on alleles because it takes too long...)")
     dbsnp = fread("/oak/stanford/groups/smontgom/amarder/data/dbsnp/hg38/sorted_1kg_matched_hg38_snp150.no_dup.txt.gz",data.table = F,stringsAsFactors = F)
     df = merge(df[,colnames(df)!="V3"],dbsnp,by=c("chr","snp_pos"),by.y=c("V1","V2"),all.x = TRUE)
     colnames(df)[colnames(df)=="V3"] = "rsid"
