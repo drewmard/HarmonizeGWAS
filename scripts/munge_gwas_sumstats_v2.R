@@ -34,7 +34,7 @@ source(paste0(HEADDIR,"/scripts/stringSplitter.R"))
 
 num_cores <- detectCores()
 studies = config$studies$study_info
-for (i in 3:length(studies)) {
+for (i in 8:length(studies)) { # need to fix 7:Major_Depression_Howard_2019...
   
   # initialize:
   trait = studies[i]
