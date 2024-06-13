@@ -34,7 +34,7 @@ source(paste0(HEADDIR,"/scripts/stringSplitter.R"))
 
 num_cores <- detectCores()
 studies = config$studies$study_info
-for (i in 1:length(studies)) {
+for (i in 3:length(studies)) {
   
   # initialize:
   trait = studies[i]
@@ -195,15 +195,16 @@ for (i in 1:length(studies)) {
       print(paste0("Running chr ",chrUse,"..."))
       attempt = 0
       repeat {
-        attempt = attempt + 1
-        if (attempt >= 2) {result = convert_to_ref_alt_1kg(df,chrNum=chrUse,parallel=FALSE)}
-        else {
-          result <- tryCatch({
-            convert_to_ref_alt_1kg(df,chrNum=chrUse,parallel=TRUE)
-          }, error = function(e) {
-            NULL
-          })
-        }
+        # attempt = attempt + 1
+        result = convert_to_ref_alt_1kg(df,chrNum=chrUse,parallel=FALSE)
+        # if (attempt >= 2) {result = convert_to_ref_alt_1kg(df,chrNum=chrUse,parallel=FALSE)}
+        # else {
+        #   result <- tryCatch({
+        #     convert_to_ref_alt_1kg(df,chrNum=chrUse,parallel=TRUE)
+        #   }, error = function(e) {
+        #     NULL
+        #   })
+        # }
         if (!is.null(result)) break
       }
       df.lst[[chrUse]] = result
