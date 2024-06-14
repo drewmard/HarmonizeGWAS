@@ -30,11 +30,11 @@ TMPDIR = config$TMPDIR
 HEADDIR = config$HEADDIR
 AUTOSOMAL_ONLY = TRUE
 CONVERT_TO_REF = TRUE
-source(paste0(HEADDIR,"/scripts/stringSplitter.R"))
+# source(paste0(HEADDIR,"/scripts/stringSplitter.R"))
 
 num_cores <- detectCores()
 studies = config$studies$study_info
-for (i in 8:length(studies)) { # need to fix 7:Major_Depression_Howard_2019...
+for (i in 10:length(studies)) { # need to fix 7:Major_Depression_Howard_2019...
   
   # initialize:
   trait = studies[i]
