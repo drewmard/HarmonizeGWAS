@@ -34,11 +34,11 @@ CONVERT_TO_REF = TRUE
 
 num_cores <- detectCores()
 studies = config$studies$study_info
-for (i in 11:length(studies)) { # need to fix 7:Major_Depression_Howard_2019... and 10: BMI_Yengo_2018
+for (i in 1:length(studies)) { # need to fix 7:Major_Depression_Howard_2019... and 10: BMI_Yengo_2018
   
   # initialize:
   trait = studies[i]
-  print(paste0("Running trait",i,"/",length(studies),": ",trait,"..."))
+  print(paste0("Running trait ",i,"/",length(studies),": ",trait,"..."))
   
   # Pull out columns specified (not NULL):
   study_info = subset(config$studies,study_info==trait)

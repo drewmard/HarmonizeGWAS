@@ -48,13 +48,17 @@ convert_to_ref_alt_1kg = function(df,chrNum,parallel=FALSE) {
   tmp2$A1 = tmp2$AltAllele
   
   tmp3 = subset(sumstats,!(iden %in% tmp2$iden))
-  tmp3$ReferenceAllele = NA
-  tmp3$AltAllele = NA
-  tmp3$A0 = tmp3$non_effect_allele
-  tmp3$A1 = tmp3$effect_allele
-  
-  # Bind:
-  sumstats = rbind(tmp2,tmp3)
+  if (nrow(tmp3)==0) { # if the dataframe were only SNVs
+    sumstats = tmp2
+  } else {
+    tmp3$ReferenceAllele = NA
+    tmp3$AltAllele = NA
+    tmp3$A0 = tmp3$non_effect_allele
+    tmp3$A1 = tmp3$effect_allele
+    
+    # Bind:
+    sumstats = rbind(tmp2,tmp3)
+  }
   rm(tmp2);rm(tmp3)
   
   # SNP ids for identity:
