@@ -13,7 +13,7 @@ library(jsonlite)
 library(data.table)
 library(parallel)
 library(dplyr)
-library(BSgenome.Hsapiens.UCSC.hg38)
+# library(BSgenome.Hsapiens.UCSC.hg38)
 library(plyranges)
 
 # Config path:
@@ -100,8 +100,22 @@ for (i in 1:length(studies)) { # need to fix 7:Major_Depression_Howard_2019... a
   print(paste0("Summary statistics reformatted..."))
   
   # # Add rsid if needed:
-  if (!("rsid" %in% colnames(df))) {df[,"rsid"] = paste0("snp",1:nrow(df))}
+  if (!("rsid" %in% colnames(df))) {
+    df[,"rsid"] = paste0("snp",1:nrow(df))
+  } else {
+    k = is.na(df$rsid)
+    if (sum(k) > 0) {df$rsid[k] = paste0("snp",1:sum(k))}
+    k2 = duplicated(df$rsid)
+    if (sum(k2) > 0) {df$rsid[k2] = paste0("snp",(sum(k)+1):(sum(k)+sum(k2)))}
+  }
   df = df %>% select(rsid,everything())
+  
+  # Need to do: Switch this such that create a pvalue column from log10 p-value column!
+  if ("log_pvalue" %in% colnames(df))  {
+    df$pvalue = springf("%.3e",10^(df$log_pvalue))
+  } else if ("neg_log_pvalue_index" %in% cols_to_use)  {
+    df$pvalue = springf("%.3e",10^(-1*df$neg_log_pvalue))
+  }
   
   # Specify build:
   build = ifelse(is.na(study_info$source_build),config$genome_build,study_info$source_build)
@@ -170,7 +184,8 @@ for (i in 1:length(studies)) { # need to fix 7:Major_Depression_Howard_2019... a
   }
   
   # Read in hg38 dataset:
-  df = fread(paste0(config$output_base_dir,"hg38","/",trait,"/",trait,".txt.gz"),data.table = F,stringsAsFactors = F)
+  f=paste0(config$output_base_dir,"hg38","/",trait,"/",trait,".txt.gz")
+  df = fread(f,data.table = F,stringsAsFactors = F)
   
   if (!("rsid_index" %in% cols_to_use)) {
     print("Crudely adding RSIDs... (not matching on alleles because it takes too long...)")
