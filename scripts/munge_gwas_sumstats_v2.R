@@ -113,9 +113,9 @@ for (i in c(14,13)) { # need to fix 7:Major_Depression_Howard_2019... and 10: BM
   
   # Need to do: Switch this such that create a pvalue column from log10 p-value column!
   if ("log_pvalue" %in% colnames(df))  {
-    df$pvalue = springf("%.3e",10^(df$log_pvalue))
+    df$pvalue = sprintf("%.3e",10^(df$log_pvalue))
   } else if ("neg_log_pvalue_index" %in% cols_to_use)  {
-    df$pvalue = springf("%.3e",10^(-1*df$neg_log_pvalue))
+    df$pvalue = sprintf("%.3e",10^(-1*df$neg_log_pvalue))
   }
   
   # Specify build:
