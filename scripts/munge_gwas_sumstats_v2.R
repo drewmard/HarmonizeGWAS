@@ -35,7 +35,7 @@ CONVERT_TO_REF = TRUE
 num_cores <- detectCores()
 studies = config$studies$study_info
 # for (i in 1:length(studies)) { # need to fix 7:Major_Depression_Howard_2019... and 10: BMI_Yengo_2018
-for (i in c(14,13)) { # need to fix 7:Major_Depression_Howard_2019... and 10: BMI_Yengo_2018
+for (i in c(15,14)) { # need to fix 7:Major_Depression_Howard_2019... and 10: BMI_Yengo_2018
   
   # initialize:
   trait = studies[i]
@@ -225,7 +225,9 @@ for (i in c(14,13)) { # need to fix 7:Major_Depression_Howard_2019... and 10: BM
       }
       df.lst[[chrUse]] = result
     }
+    print("Combining chromosomes...")
     df = as.data.frame(do.call(rbind,df.lst))
+    print("Saving file...")
     f.out = paste0(config$output_base_dir,"hg38","/",trait,"/",trait,".v2.txt.gz")
     fwrite(df,f.out,quote = F,na = "NA",sep = '\t',row.names = F,col.names = T,compress = "gzip")
   } else {
